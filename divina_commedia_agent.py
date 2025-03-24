@@ -13,13 +13,7 @@ from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
 from langchain_core.messages import HumanMessage
-
-if "MISTRAL_API_KEY" not in os.environ:
-    os.environ["MISTRAL_API_KEY"] = getpass.getpass(
-        "Enter your Mistral API key:")
-# !pip install --upgrade langgraph colorama
-llm = ChatMistralAI(model="mistral-large-latest",
-                    temperature=0.0, max_retries=2)
+from factory import model_factory
 
 PROMPT_TEMPLATE = ChatPromptTemplate.from_messages([
     ("system",
@@ -35,6 +29,8 @@ PROMPT_TEMPLATE = ChatPromptTemplate.from_messages([
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--model", type=str, choices=["mistral-large-latest", "mistral-small-latest", "gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"],
+                        default="mistral-large-latest")
     parser.add_argument("--context_file_path", type=str,
                         default="commedia.txt")
     parser.add_argument("--vector_store_serialized_path",
@@ -91,11 +87,12 @@ if __name__ == "__main__":
 
     args = parse_args()
 
+    llm = model_factory(model_name=args.model, temperature=0.0)
+
     context_retriever = ContextRetriever(
         context_file_path=args.context_file_path, vector_store_serialized_path=args.vector_store_serialized_path)
 
     app = build_graph(context_retriever, args.disable_rag)
-    config = {"configurable": {"thread_id": uuid.uuid4()}}
 
     while True:
         user_input = input(">> ")
