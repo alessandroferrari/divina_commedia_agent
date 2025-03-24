@@ -1,0 +1,6 @@
+langchain==0.3.21
+langgraph==0.3.18
+langchain_mistralai==0.2.9
+colorama==0.4.6
+dotenv==0.9.9
+faiss-gpu==1.7.4
